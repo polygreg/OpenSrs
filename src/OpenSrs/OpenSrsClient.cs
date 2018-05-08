@@ -20,22 +20,25 @@ namespace OpenSrs
         {
             this.endpoint = testing ? testingEndpoint : productionEndpoint;
             this.userName = userName ?? throw new ArgumentNullException(nameof(userName));
-            this.key      = key ?? throw new ArgumentNullException(nameof(key));
+            this.key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-		public async Task<GetBalanceResult> GetBalanceAsync(GetBalanceRequest request) =>
+        public async Task<GetBalanceResult> GetBalanceAsync(GetBalanceRequest request) =>
             GetBalanceResult.Parse(await SendAsync(request).ConfigureAwait(false));
 
-        public async Task<GetPriceResult> GetPriceAsync(GetPriceRequest request) => 
+        public async Task<GetDomainsByExpireDateResult> GetDomainsByExpireDateAsync(GetDomainsByExpireDateRequest request) =>
+            GetDomainsByExpireDateResult.Parse(await SendAsync(request).ConfigureAwait(false));
+
+        public async Task<GetPriceResult> GetPriceAsync(GetPriceRequest request) =>
             GetPriceResult.Parse(await SendAsync(request));
 
-        public async Task<LookupResult> LookupAsync(LookupRequest request) => 
+        public async Task<LookupResult> LookupAsync(LookupRequest request) =>
             LookupResult.Parse(await SendAsync(request).ConfigureAwait(false));
-        
-        public async Task<NameSuggestResult> NameSuggestAsync(NameSuggestRequest request) => 
+
+        public async Task<NameSuggestResult> NameSuggestAsync(NameSuggestRequest request) =>
             NameSuggestResult.Parse(await SendAsync(request).ConfigureAwait(false));
 
-        public async Task<RegisterResult> RegisterAsync(RegisterRequest request) => 
+        public async Task<RegisterResult> RegisterAsync(RegisterRequest request) =>
             RegisterResult.Parse(await SendAsync(request).ConfigureAwait(false));
 
         #region Execution
@@ -46,12 +49,13 @@ namespace OpenSrs
 
             sb.AppendLine(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""no""?>");
             sb.AppendLine(@"<!DOCTYPE OPS_envelope SYSTEM ""ops.dtd"">");
-            
+
             sb.Append(request.ToXml().ToString());
 
             var requestXml = sb.ToString();
 
-            var webRequest = new HttpRequestMessage(HttpMethod.Post, endpoint) {
+            var webRequest = new HttpRequestMessage(HttpMethod.Post, endpoint)
+            {
                 Content = new StringContent(requestXml, Encoding.UTF8, "text/xml"),
 
                 Headers = {
